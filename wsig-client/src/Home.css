@@ -1,0 +1,17 @@
+.home-form {
+    margin: 200px 0px;
+    width: 100%;
+    padding: 0px;
+    border: black 1px solid;
+}
+
+.home-form > form {
+    width: 40%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: black 1px solid;
+    margin: auto;
+    padding: 5px;
+    text-align: center;
+}

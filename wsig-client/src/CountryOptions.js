@@ -11,7 +11,7 @@ class CountryOptions extends React.Component {
             <select value={this.props.stateVar} onChange={this.props.changeCB}>
                 <option value="">-Select Country-</option>
                 {this.props.countryList.map((country) => (
-                    <option key={country.name} value={country.alpha3Code}>{country.alpha3Code + "\t\u2014\t" + country.name}</option> 
+                    <option key={country.alpha2Code} value={country.alpha2Code}>{country.name + "\t\u2014\t" + country.alpha3Code}</option> 
                 ))}
             </select>
         )

@@ -1,5 +1,6 @@
 import React from 'react'
 import CountryOptions from './CountryOptions'
+import AirportOptions from './AirportOptions'
 
 const temperatureEnum = ({
     "none"      :   0,
@@ -40,7 +41,9 @@ class Home extends React.Component {
             preferredTemperature: temperatureEnum.none,
             preferredWeather: weatherEnum.none,
             timeframe: timeframeEnum.none,
-            countryList: []
+            countryList: [],
+            departureAirports: [],
+            destinationAirports : []
         };
 
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -50,6 +53,7 @@ class Home extends React.Component {
         this.destinationChange = this.destinationChange.bind(this);
         this.temperatureChange = this.temperatureChange.bind(this);
         this.weatherChange = this.weatherChange.bind(this);
+        this.timeframeChange = this.timeframeChange.bind(this);
     }
 
     async componentDidMount() {
@@ -72,20 +76,17 @@ class Home extends React.Component {
         }
     }
 
-    getAirportList() {
-        fetch("https://airport-info.p.rapidapi.com/airport", {
-            "method": "GET",    
-            "headers": {
-                "x-rapidapi-key": "08181ebff5mshfa3fb616d86e8cep17fdd3jsnb5b413f70f8a",
-                "x-rapidapi-host": "airport-info.p.rapidapi.com"
-            }
-        })
-        .then(response => {
-            console.log(response)
-        })
-        .catch(err => {
-            console.error(err);
-        });
+    async getAirportList(iso_country) {
+        try {
+            let response = await fetch(`http://localhost:5000/airports?iso_country=${iso_country}`, {
+                "method": "GET",
+                "mode": "cors"
+            })
+            return response.json()
+        }
+        catch(error) {
+            console.log(error)
+        }
     }
 
     handleSubmit(event) {
@@ -93,15 +94,25 @@ class Home extends React.Component {
     }
 
     departureCountryChange(event) {
-        this.setState({departureCountry: event.value})
+        this.setState({
+            departureCountry: event.target.value,
+        })
+        this.getAirportList(event.target.value).then((airportList) => {
+            this.setState({departureAirports: airportList})
+        })
     }
 
     departureChange(event) {
-        this.setState({departure: event.value})
+        this.setState({departure: event.target.value})
     }
 
-    destinationCountryChange(event) {
-        this.setState({destinationCountry: event.value})
+    async destinationCountryChange(event) {
+        this.setState({
+            destinationCountry: event.target.value,
+        })
+        this.getAirportList(event.target.value).then((airportList) => {
+            this.setState({destinationAirports: airportList})
+        })
     }
 
     destinationChange(event) {
@@ -117,7 +128,7 @@ class Home extends React.Component {
     }
 
     timeframeChange(event) {
-        //...
+        this.setState({timeframe: event.value})
     }
 
     render() {  
@@ -131,7 +142,7 @@ class Home extends React.Component {
                         </tr>
                         <tr>
                             <td><label>Departure Airport</label></td>
-                            <td><input type="text" value={this.state.departure} onChange={this.departureChange}></input></td>
+                            <td><AirportOptions stateVar={this.state.departure} changeCB={this.departureChange} airportList={this.state.departureAirports}></AirportOptions></td>
                         </tr>
                         <tr>
                             <td><label>Destination Country</label></td>
@@ -139,7 +150,7 @@ class Home extends React.Component {
                         </tr>
                         <tr>
                             <td><label>Destination Airport</label></td>
-                            <td><input type="text" value={this.state.destination} onChange={this.destinationChange}></input></td>
+                            <td><AirportOptions stateVar={this.state.destination} changeCB={this.destinationChange} airportList={this.state.destinationAirports}></AirportOptions></td>
                         </tr>
                         <tr>
                             <td><label>Preferred Temperature</label></td>

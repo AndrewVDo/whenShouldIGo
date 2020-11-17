@@ -1,10 +1,10 @@
 version: "3.7"
 services:
-  # client:
-  #   build: ./client
-  #   ports:
-  #     - '3000:3000'
+  client:
+    build: ./wsig-client
+    ports:
+      - '3000:3000'
   server:
-    build: ./server
+    build: ./wsig-server
     ports:
       - '5000:5000'

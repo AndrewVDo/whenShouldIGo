@@ -9,8 +9,8 @@ def readInternationalAirports(includedCols=range(18)):
         reader = csv.reader(csvfile, delimiter=',')
         for row in reader:
             content = list(row[i] for i in includedCols)
-            # Airports with regular service + iata code
-            if content[13] and content[11] == "yes":
+            # Airports with regular service + iata code + medium/large airports
+            if content[13] and content[11] == "yes" and (content[2] == "large_airport" or content[2] == "medium_aiport"):
                 document = {
                     '_id': content[0],
                     'name': content[3],

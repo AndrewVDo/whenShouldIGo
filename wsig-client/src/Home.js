@@ -61,13 +61,11 @@ class Home extends React.Component {
     }
 
     async getCountryList() {
+        console.log(process.env)
         try {
-            let response = await fetch("https://restcountries-v1.p.rapidapi.com/all", {
+            let response = await fetch("http://localhost:5000/countries", {
                 "method": "GET",
-                "headers": {
-                    "x-rapidapi-key": "08181ebff5mshfa3fb616d86e8cep17fdd3jsnb5b413f70f8a",
-                    "x-rapidapi-host": "restcountries-v1.p.rapidapi.com"
-                }
+                "mode": "cors"
             })
             return response.json()
         }

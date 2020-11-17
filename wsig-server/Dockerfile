@@ -1,6 +1,6 @@
 FROM python:3.8
 
-ENV FLASK_APP pyServer.py
+ENV FLASK_APP server.py
 
 WORKDIR /app
 COPY . .

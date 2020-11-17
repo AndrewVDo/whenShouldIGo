@@ -19,16 +19,8 @@ const weatherEnum = ({
     "sunny"     :   4
 });
 
-const timeframeEnum = ({
-    "none"      :   0,
-    "month"     :   1,
-    "6months"   :   2,
-    "year"      :   3
-});
-
 Object.freeze(temperatureEnum);
 Object.freeze(weatherEnum);
-Object.freeze(timeframeEnum);
 
 class Home extends React.Component {
     constructor(props) {
@@ -40,7 +32,6 @@ class Home extends React.Component {
             destination: "",
             preferredTemperature: temperatureEnum.none,
             preferredWeather: weatherEnum.none,
-            timeframe: timeframeEnum.none,
             countryList: [],
             departureAirports: [],
             destinationAirports : []
@@ -53,7 +44,6 @@ class Home extends React.Component {
         this.destinationChange = this.destinationChange.bind(this);
         this.temperatureChange = this.temperatureChange.bind(this);
         this.weatherChange = this.weatherChange.bind(this);
-        this.timeframeChange = this.timeframeChange.bind(this);
     }
 
     async componentDidMount() {
@@ -125,9 +115,6 @@ class Home extends React.Component {
         this.setState({preferredWeather: event.value})
     }
 
-    timeframeChange(event) {
-        this.setState({timeframe: event.value})
-    }
 
     render() {  
         var element = (
@@ -169,15 +156,6 @@ class Home extends React.Component {
                                 <option value={weatherEnum.rainy}>Rainy</option>
                                 <option value={weatherEnum.cloudy}>Cloudy</option>
                                 <option value={weatherEnum.sunny}>Sunny</option>
-                            </select></td>
-                        </tr>
-                        <tr>
-                            <td><label>Timeframe</label></td>
-                            <td><select value={this.state.timeframe} onChange={this.timeframeChange}>
-                                <option value={timeframeEnum.none}>None</option>
-                                <option value={timeframeEnum.month}>Within 1 month</option>
-                                <option value={timeframeEnum["6months"]}>Within 6 months</option>
-                                <option value={timeframeEnum.year}>Within 1 year</option>
                             </select></td>
                         </tr>
                     </tbody></table>

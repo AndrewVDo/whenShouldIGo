@@ -5,3 +5,4 @@ flask
 python-dotenv
 dnspython
 requests
+meteostat

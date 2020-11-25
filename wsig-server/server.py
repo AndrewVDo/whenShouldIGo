@@ -1,6 +1,7 @@
 from flask import Flask, request, abort
 from flask_cors import CORS
 import pymongo
+from meteostat import Stations, Daily
 from bson.json_util import dumps
 from bson.json_util import loads
 from enum import Enum
@@ -62,7 +63,7 @@ def airports():
         airportCursor = airportDB.airport_collection.find(
             {'iso_country': country})
     except:
-        abort(502, 'MongoDB not reachable')
+        abort(503, 'MongoDB not reachable')
     return dumps(airportCursor)
 
 
@@ -93,12 +94,50 @@ def when():
         abort(400, 'invalid weather request')
 
     histRates = queryCurrency(destinationCountry, departureCountry)
+    histClimate = queryClimate(destinationAirport)
 
-    return '\n'.join(str(p[0]) + '/' + str(p[1]) for p in histRates)
+    # return '\n'.join(str(p[0]) + '/' + str(p[1]) for p in histRates)
+    return '\n'.join(f'{attr} = {getattr(histClimate, attr)}' for attr in histClimate)
+
+
+def getLatLongCity(destination):
+    assert type(destination) == str and len(destination) == 3
+    try:
+        response = airportDB.airport_collection.find_one(
+            {'iata_code': destination})
+        reqFields = ['latitude', 'longitude', 'municipality']
+        if not response or not all(attr in response for attr in reqFields):
+            abort(
+                404, f'Location info not found for airport IATA code {destination}')
+        return float(response['latitude']), float(response['longitude']), response['municipality']
+    except:
+        abort(503, "MongoDB not reachable")
+
+
+def dateMonthsBack(monthsBack=12):
+    def lastMonth(tPoint):
+        if tPoint.month == 1:
+            return datetime(tPoint.year-1, 12, 1)
+        return datetime(tPoint.year, tPoint.month-1, 1)
+
+    today = datetime.today()
+    monthsAgo = datetime.today()
+    for m in range(monthsBack):
+        monthsAgo = lastMonth(monthsAgo)
+    return today, monthsAgo
 
 
 def queryClimate(destination):
-    return 'sunny down under'
+    (lat, lon, _) = getLatLongCity(destination)
+    stations = Stations(lat=lat, lon=lon)
+    station = stations.fetch(1)
+
+    (today, twoYearsAgo) = dateMonthsBack()
+    print(today, file=sys.stdout)
+    print(twoYearsAgo, file=sys.stdout)
+    climateData = Daily(station, start=twoYearsAgo, end=today)
+    climateData = climateData.fetch()
+    return climateData
 
 
 def getCurrencyName(countryCode):
@@ -154,7 +193,7 @@ def getCurrencyHistory(destinationCurrency, departureCurrency):
     assert type(departureCurrency) == str and type(destinationCurrency) == str
     assert 3 == len(departureCurrency) == len(destinationCurrency)
     currHist = []
-    for date in lastMonths(3):
+    for date in lastMonths():
         histRate = getCachedCurrencyRate(date)
         if histRate:
             if 'rates' not in histRate:

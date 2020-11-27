@@ -48,7 +48,7 @@ def countries():
         'x-rapidapi-key': rapidKey,
         'x-rapidapi-host': "ajayakv-rest-countries-v1.p.rapidapi.com"
     }
-    response = requests.request("GET", url, headers)
+    response = requests.request("GET", url, headers=headers)
     if response.status_code != 200:
         abort(502, 'rest-countries api not reachable')
     return dumps(response.json())
@@ -93,11 +93,27 @@ def when():
     if not weather:
         abort(400, 'invalid weather request')
 
-    histRates = queryCurrency(destinationCountry, departureCountry)
-    histClimate = queryClimate(destinationAirport)
+    departure = {
+        'airport': departureAirport,
+        'country': departureCountry
+    }
+    destination = {
+        'airport': destinationAirport,
+        'country': destinationCountry
+    }
+    climate = {
+        'temperature': temperature,
+        'weather': weather
+    }
+
+    histRates = queryCurrency(destination, departure)
+    histClimate = queryClimate(destination)
+    flightQuotes = queryFlights(destination, departure)
+    queryHotels(destination)
 
     # return '\n'.join(str(p[0]) + '/' + str(p[1]) for p in histRates)
-    return '\n'.join(f'{attr} = {getattr(histClimate, attr)}' for attr in histClimate)
+    # return '\n'.join(f'{attr} = {getattr(histClimate, attr)}' for attr in histClimate)
+    return dumps(flightQuotes)
 
 
 def getLatLongCity(destination):
@@ -114,28 +130,35 @@ def getLatLongCity(destination):
         abort(503, "MongoDB not reachable")
 
 
-def dateMonthsBack(monthsBack=12):
+def getDatePoints(months):
     def lastMonth(tPoint):
         if tPoint.month == 1:
             return datetime(tPoint.year-1, 12, 1)
         return datetime(tPoint.year, tPoint.month-1, 1)
 
+    def nextMonth(tPoint):
+        if tPoint.month == 12:
+            return datetime(tPoint.year+1, 1, 1)
+        return datetime(tPoint.year, tPoint.month+1, 1)
+
     today = datetime.today()
-    monthsAgo = datetime.today()
-    for m in range(monthsBack):
-        monthsAgo = lastMonth(monthsAgo)
-    return today, monthsAgo
+    tPoints = [datetime.today()]
+    for m in range(abs(months)):
+        if months > 0:
+            tPoints.append(nextMonth(tPoints[m]))
+        else:
+            tPoints.append(lastMonth(tPoints[m]))
+    return tPoints
 
 
 def queryClimate(destination):
-    (lat, lon, _) = getLatLongCity(destination)
+    assert 'airport' in destination and len(destination['airport']) == 3
+    (lat, lon, _) = getLatLongCity(destination['airport'])
     stations = Stations(lat=lat, lon=lon)
     station = stations.fetch(1)
 
-    (today, twoYearsAgo) = dateMonthsBack()
-    print(today, file=sys.stdout)
-    print(twoYearsAgo, file=sys.stdout)
-    climateData = Daily(station, start=twoYearsAgo, end=today)
+    datePoints = getDatePoints(-12)
+    climateData = Daily(station, start=datePoints[11], end=datePoints[0])
     climateData = climateData.fetch()
     return climateData
 
@@ -168,24 +191,11 @@ def cacheCurrencyRate(fixerRsp):
         abort(503, "MongoDB not reachable")
 
 
-def lastMonths(monthsBack=24):
-    def lastMonth(tPoint):
-        if tPoint.month == 1:
-            return datetime(tPoint.year-1, 12, 1)
-        return datetime(tPoint.year, tPoint.month-1, 1)
-
-    today = datetime.today()
-    tPoints = [datetime.today()]
-    for m in range(monthsBack):
-        tPoints.append(lastMonth(tPoints[m]))
-    return list(map(lambda date: date.strftime('%Y-%m-%d'), tPoints))
-
-
 def getCurrencyRatesFromAPI(dateString):
     url = f"http://data.fixer.io/api/{dateString}?access_key={fixerKey}"
     response = requests.request("GET", url)
     if response.status_code != 200:
-        abort(502, 'rest-countries api not reachable')
+        abort(502, 'rest-currency api not reachable')
     return response.json()
 
 
@@ -193,7 +203,7 @@ def getCurrencyHistory(destinationCurrency, departureCurrency):
     assert type(departureCurrency) == str and type(destinationCurrency) == str
     assert 3 == len(departureCurrency) == len(destinationCurrency)
     currHist = []
-    for date in lastMonths():
+    for date in list(map(lambda date: date.strftime('%Y-%m-%d'), getDatePoints(-24))):
         histRate = getCachedCurrencyRate(date)
         if histRate:
             if 'rates' not in histRate:
@@ -220,18 +230,34 @@ def getCurrencyHistory(destinationCurrency, departureCurrency):
 
 
 def queryCurrency(destination, departure):
-    assert destination and len(destination) == 2
-    assert departure or len(departure) == 2
+    assert 'country' in destination and len(destination['country']) == 2
+    assert 'country' in departure and len(departure['country']) == 2
 
-    destinationCurrency = getCurrencyName(destination)
-    departureCurrency = getCurrencyName(departure)
-    currHist = getCurrencyHistory(destinationCurrency, departureCurrency)
+    destination['currency'] = getCurrencyName(destination['country'])
+    departure['currency'] = getCurrencyName(departure['country'])
+    currHist = getCurrencyHistory(
+        destination['currency'], departure['currency'])
 
     return currHist
 
 
+def getFlightQuotes(destination, departure, date="anytime"):
+    url = f"https://skyscanner-skyscanner-flight-search-v1.p.rapidapi.com/apiservices/browsequotes/v1.0/{departure['country']}/{departure['currency']}/en-{departure['country']}/{departure['airport']}-sky/{destination['airport']}-sky/{date}"
+    headers = {
+        'x-rapidapi-key': rapidKey,
+        'x-rapidapi-host': "skyscanner-skyscanner-flight-search-v1.p.rapidapi.com"
+    }
+    response = requests.request("GET", url, headers=headers)
+    if response.status_code != 200:
+        abort(502, 'rest-skyscanner api not reachable')
+    return response.json()['Quotes']
+
+
 def queryFlights(destination, departure):
-    return '1000$'
+    flightQuotes = []
+    for date in list(map(lambda date: date.strftime('%Y-%m'), getDatePoints(12))):
+        flightQuotes += getFlightQuotes(destination, departure, date)
+    return flightQuotes
 
 
 def queryHotels(destination):

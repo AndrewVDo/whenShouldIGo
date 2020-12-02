@@ -260,9 +260,5 @@ def queryFlights(destination, departure):
     return flightQuotes
 
 
-def queryHotels(destination):
-    return '100$/night'
-
-
 if __name__ == "__main__":
     app.run()

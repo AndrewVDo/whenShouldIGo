@@ -32,7 +32,6 @@ User gets:
     recommendation of when to travel based on:
         optimum currency rate
         optimum flight price
-        optimum hotel price
         optimum weather
     destination on map (MapBox API)
 

@@ -21,6 +21,7 @@ import image12 from './images/12.jpg'
 ReactDOM.render(
   <React.StrictMode>
     <BackgroundSlider 
+      className="bg-slider"
       images={[
         image1,
         image2,

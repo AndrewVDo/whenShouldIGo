@@ -9,6 +9,13 @@ import os
 import requests
 from dotenv import load_dotenv
 from datetime import datetime
+from ctypes import *
+import math
+
+so_file = "/app/calculate.so"
+C_FUNCTIONS = CDLL(so_file)
+C_FUNCTIONS.weatherRating.restype = c_float
+C_FUNCTIONS.temperatureRating.restype = c_float
 
 load_dotenv()
 app = Flask(__name__)
@@ -35,10 +42,8 @@ class TemperatureEnum(Enum):
 
 class WeatherEnum(Enum):
     none = 0
-    snowy = 1
-    rainy = 2
-    cloudy = 3
-    sunny = 4
+    rainy = 1
+    sunny = 2
 
 
 @app.route('/countries', methods=["GET"])
@@ -85,12 +90,12 @@ def when():
     if not destinationAirport or len(destinationAirport) != 3:
         abort(400, 'invalid destination airport')
 
-    temperature = TemperatureEnum(int(request.args.get('temperature')))
-    if not temperature:
+    temperature = int(request.args.get('temperature'))
+    if temperature < 0 or temperature > 5:
         abort(400, 'invalid temperature request')
 
-    weather = WeatherEnum(int(request.args.get('weather')))
-    if not weather:
+    weather = int(request.args.get('weather'))
+    if weather < 0 or weather > 2:
         abort(400, 'invalid weather request')
 
     departure = {
@@ -106,14 +111,13 @@ def when():
         'weather': weather
     }
 
-    histRates = queryCurrency(destination, departure)
-    histClimate = queryClimate(destination)
-    flightQuotes = queryFlights(destination, departure)
-    queryHotels(destination)
-
-    # return '\n'.join(str(p[0]) + '/' + str(p[1]) for p in histRates)
-    # return '\n'.join(f'{attr} = {getattr(histClimate, attr)}' for attr in histClimate)
-    return dumps(flightQuotes)
+    return dumps({
+        'currency' : queryCurrency(destination, departure),
+        'climate'  : queryClimate(destination, climate),
+        'flights'  : queryFlights(destination, departure),
+        'dstCurr'  : destination['currency'],
+        'dptCurr'  : departure['currency']
+    })
 
 
 def getLatLongCity(destination):
@@ -151,16 +155,41 @@ def getDatePoints(months):
     return tPoints
 
 
-def queryClimate(destination):
+def queryClimate(destination, climate):
     assert 'airport' in destination and len(destination['airport']) == 3
     (lat, lon, _) = getLatLongCity(destination['airport'])
-    stations = Stations(lat=lat, lon=lon)
+    stations = Stations()
+    stations = stations.nearby(lat, lon)
     station = stations.fetch(1)
 
+    temperatureScores = []
+    weatherScores = []
+
+    def checkPrcpAvail(prcpsData):
+        for x in samplePrcps:
+            if math.isnan(x):
+                return False
+        return True
+
     datePoints = getDatePoints(-12)
-    climateData = Daily(station, start=datePoints[11], end=datePoints[0])
-    climateData = climateData.fetch()
-    return climateData
+    for i in range(len(datePoints)-1):
+        climateData = Daily(station, start=datePoints[i+1], end=datePoints[i])
+        climateData = climateData.fetch()
+
+        sampleTmps = climateData.to_dict('series')['tavg']
+        samplePrcps = climateData.to_dict('series')['prcp']
+        nSamples = len(samplePrcps)
+
+        tempRating = C_FUNCTIONS.temperatureRating(c_int(nSamples), (c_float * nSamples)(*sampleTmps), c_int(climate['temperature']))
+        if checkPrcpAvail(samplePrcps):
+            weatherRating = C_FUNCTIONS.weatherRating(c_int(nSamples), (c_float * nSamples)(*samplePrcps), c_int(climate['weather']))
+        else:
+            weatherRating = 0.0
+
+        temperatureScores.append(tempRating)
+        weatherScores.append(weatherRating)
+
+    return zip(list(map(lambda date: date.strftime('%Y-%m'), datePoints)), temperatureScores, weatherScores)
 
 
 def getCurrencyName(countryCode):
@@ -224,8 +253,8 @@ def getCurrencyHistory(destinationCurrency, departureCurrency):
         if destinationCurrency not in rates or float(rates[destinationCurrency]) == 0.0:
             abort(
                 404, f'Missing or invalid currency data for {destinationCurrency} on {date}')
-        currHist.append(
-            (float(rates[destinationCurrency]), float(rates[destinationCurrency])))
+        currHist.append(float(rates[destinationCurrency]) / float(rates[departureCurrency]))
+
     return currHist
 
 
@@ -254,10 +283,20 @@ def getFlightQuotes(destination, departure, date="anytime"):
 
 
 def queryFlights(destination, departure):
-    flightQuotes = []
-    for date in list(map(lambda date: date.strftime('%Y-%m'), getDatePoints(12))):
-        flightQuotes += getFlightQuotes(destination, departure, date)
-    return flightQuotes
+    bestPrices = []
+    dates = list(map(lambda date: date.strftime('%Y-%m'), getDatePoints(12)))
+
+    for date in dates:
+        quotes = getFlightQuotes(destination, departure, date)
+        
+        numQuotes = len(quotes)
+        prices = (c_int * numQuotes)()
+        for i in range(numQuotes):
+            prices[i] = c_int(quotes[i]['MinPrice'])
+
+        bestPrices.append(C_FUNCTIONS.bestFlightDates(c_int(numQuotes), prices))
+    
+    return zip(dates, bestPrices)
 
 
 if __name__ == "__main__":

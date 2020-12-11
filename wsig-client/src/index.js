@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Home from './Home';
+import Root from './Root';
 import './stylesheets/Home.css'
 import BackgroundSlider from 'react-background-slider'
 import reportWebVitals from './reportWebVitals';
@@ -39,7 +39,7 @@ ReactDOM.render(
       duration={10}
       transition={2}
     />
-    <Home />
+    <Root />
   </React.StrictMode>,
   document.getElementById('root')
 );

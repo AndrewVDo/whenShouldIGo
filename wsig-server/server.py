@@ -111,12 +111,28 @@ def when():
         'weather': weather
     }
 
+    currDates, currHist = queryCurrency(destination, departure)
+    climDates, tempScores, wthrScores = queryClimate(destination, climate)
+    flightDates, flightPrices = queryFlights(destination, departure)
+
     return dumps({
-        'currency' : queryCurrency(destination, departure),
-        'climate'  : queryClimate(destination, climate),
-        'flights'  : queryFlights(destination, departure),
+        'currDates' : currDates,
+        'currHist'  : currHist,
+        'climDates' : climDates,
+        
+        'tempScores': tempScores,
+        'wthrScores': wthrScores,
+
+        'flightDates': flightDates,
+        'flightPrices': flightPrices,
+
         'dstCurr'  : destination['currency'],
-        'dptCurr'  : departure['currency']
+        'dstCtry'  : destination['country'],
+        'dstAprt'  : destination['airport'],
+
+        'dptCurr'  : departure['currency'],
+        'dptCtry'  : departure['country'],
+        'dptAprt'  : departure['airport']
     })
 
 
@@ -189,7 +205,7 @@ def queryClimate(destination, climate):
         temperatureScores.append(tempRating)
         weatherScores.append(weatherRating)
 
-    return zip(list(map(lambda date: date.strftime('%Y-%m'), datePoints)), temperatureScores, weatherScores)
+    return list(map(lambda date: date.strftime('%Y-%m'), datePoints)), temperatureScores, weatherScores
 
 
 def getCurrencyName(countryCode):
@@ -232,7 +248,9 @@ def getCurrencyHistory(destinationCurrency, departureCurrency):
     assert type(departureCurrency) == str and type(destinationCurrency) == str
     assert 3 == len(departureCurrency) == len(destinationCurrency)
     currHist = []
-    for date in list(map(lambda date: date.strftime('%Y-%m-%d'), getDatePoints(-24))):
+    currDates = list(map(lambda date: date.strftime('%Y-%m-%d'), getDatePoints(-24)))
+
+    for date in currDates:
         histRate = getCachedCurrencyRate(date)
         if histRate:
             if 'rates' not in histRate:
@@ -255,7 +273,8 @@ def getCurrencyHistory(destinationCurrency, departureCurrency):
                 404, f'Missing or invalid currency data for {destinationCurrency} on {date}')
         currHist.append(float(rates[destinationCurrency]) / float(rates[departureCurrency]))
 
-    return currHist
+    currDates[:] = [x[:7] for x in currDates]
+    return currDates, currHist
 
 
 def queryCurrency(destination, departure):
@@ -264,10 +283,10 @@ def queryCurrency(destination, departure):
 
     destination['currency'] = getCurrencyName(destination['country'])
     departure['currency'] = getCurrencyName(departure['country'])
-    currHist = getCurrencyHistory(
+    currDates, currHist = getCurrencyHistory(
         destination['currency'], departure['currency'])
 
-    return currHist
+    return currDates, currHist
 
 
 def getFlightQuotes(destination, departure, date="anytime"):
@@ -296,7 +315,7 @@ def queryFlights(destination, departure):
 
         bestPrices.append(C_FUNCTIONS.bestFlightDates(c_int(numQuotes), prices))
     
-    return zip(dates, bestPrices)
+    return dates, bestPrices
 
 
 if __name__ == "__main__":

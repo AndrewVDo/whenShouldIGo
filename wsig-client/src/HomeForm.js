@@ -1,5 +1,6 @@
 import React from 'react'
 import Select from 'react-select'
+import {Redirect} from 'react-router-dom'
 
 const temperatureOptions = [
     { label: "None",        value: 0 },
@@ -19,7 +20,7 @@ const weatherOptions = [
 Object.freeze(temperatureOptions);
 Object.freeze(weatherOptions);
 
-class Home extends React.Component {
+class HomeForm extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -31,7 +32,8 @@ class Home extends React.Component {
             preferredWeather: null,
             countryList: [],
             departureAirports: [],
-            destinationAirports : []
+            destinationAirports : [],
+            result : null
         };
 
         this.handleReset = this.handleReset.bind(this);
@@ -75,7 +77,6 @@ class Home extends React.Component {
     }
 
     handleReset() {
-
         this.setState({
             departureCountry: null,
             departure: null,
@@ -83,7 +84,7 @@ class Home extends React.Component {
             destination: null,
             preferredTemperature: null,
             preferredWeather: null
-        })
+        });
     }
 
     async whenRequest() {
@@ -100,9 +101,9 @@ class Home extends React.Component {
     }
 
     async handleSubmit() {
-        //set to loading state
-        const response = await this.whenRequest()
-        console.log(response)
+        this.setState({
+            result : await this.whenRequest()
+        })
     }
 
     async departureCountryChange(option) {
@@ -144,6 +145,13 @@ class Home extends React.Component {
 
 
     render() {  
+        if(this.state.result) {
+            return <Redirect to={{
+                pathname: '/whenShouldIGo',
+                state: { result: this.state.result }
+            }}></Redirect>
+        }
+
         const countryListToOptions = function(country) {
             return { 
                 label: (country.name + "\t\u2014\t" + country.alpha3Code),  
@@ -208,4 +216,4 @@ class Home extends React.Component {
     }
 }
 
-export default Home;
+export default HomeForm;

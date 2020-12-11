@@ -19,8 +19,8 @@ Python responds to REST request by gathering data for user query:
 Python server will then call a C++ (Boost.Python wrapped) function to 
 perform a calculation determining the best time to travel.
 
-# C++ Application
-Boost.Python wrapped C++ program, which allows python to call it
+# C Application
+Pytong to C shared object file, which allows python to call it
 Will take data collected by the python server and perform forecasting
 based on historical data and actual prices, it returns 
 4 x Monthly-segmented scoring vectors (one for each category).

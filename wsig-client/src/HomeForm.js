@@ -33,7 +33,8 @@ class HomeForm extends React.Component {
             countryList: [],
             departureAirports: [],
             destinationAirports : [],
-            result : null
+            result : null,
+            goMessage : "Go!"
         };
 
         this.handleReset = this.handleReset.bind(this);
@@ -97,12 +98,19 @@ class HomeForm extends React.Component {
         }
         catch(error) {
             console.log(error)
+            alert("Sorry that request didn't work please try another one!")
         }
     }
 
     async handleSubmit() {
         this.setState({
-            result : await this.whenRequest()
+            goMessage : "Loading..."
+        });
+        
+        let result = await this.whenRequest();
+        this.setState({
+            goMessage : "Go!",
+            result: result
         })
     }
 
@@ -204,7 +212,7 @@ class HomeForm extends React.Component {
                         <tfoot>
                             <tr>
                                 <td><button type="button" onClick={this.handleReset}>Reset</button></td>
-                                <td><button type="button" onClick={this.handleSubmit}>Go!</button></td>
+                                <td><button type="button" onClick={this.handleSubmit}>{this.state.goMessage}</button></td>
                             </tr>
                         </tfoot>
                     </table>

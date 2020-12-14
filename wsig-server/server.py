@@ -292,20 +292,15 @@ def getFlightQuotes(destination, departure, date="anytime"):
 
 
 def queryFlights(destination, departure):
-    bestPrices = []
-    dates = list(map(lambda date: date.strftime('%Y-%m'), getDatePoints(12)))
+    flightDates = []
+    flightPrices = []
 
-    for date in dates:
-        quotes = getFlightQuotes(destination, departure, date)
-        
-        numQuotes = len(quotes)
-        prices = (c_int * numQuotes)()
-        for i in range(numQuotes):
-            prices[i] = c_int(quotes[i]['MinPrice'])
-
-        #TODO: Ratings
+    for yearMonth in list(map(lambda date: date.strftime('%Y-%m'), getDatePoints(12))):
+        for quote in getFlightQuotes(destination, departure, yearMonth):
+            flightPrices.append(quote['MinPrice'])
+            flightDates.append(quote['OutBoundLeg']['DepartureDate'])
     
-    return dates, bestPrices
+    return flightDates, flightPrices
 
 
 if __name__ == "__main__":

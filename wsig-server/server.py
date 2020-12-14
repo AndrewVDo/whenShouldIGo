@@ -9,7 +9,6 @@ import os
 import requests
 from dotenv import load_dotenv
 from datetime import datetime
-import math
 
 load_dotenv()
 app = Flask(__name__)
@@ -139,7 +138,6 @@ def getDatePoints(months):
             return datetime(tPoint.year+1, 1, 1)
         return datetime(tPoint.year, tPoint.month+1, 1)
 
-    today = datetime.today()
     tPoints = [datetime.today()]
     for m in range(abs(months)):
         if months > 0:

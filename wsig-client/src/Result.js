@@ -20,7 +20,7 @@ class Result extends React.Component {
                     <Link className="link" to='/'>Back</Link>
                     <h1>When Should I Go?</h1>
                     <div ref={this.scrollRef} className="plot-scroll">
-                        <Plot
+                        {/* <Plot
                             data={[
                             {
                                 x: result.flightDates,
@@ -31,7 +31,7 @@ class Result extends React.Component {
                             },
                             ]}
                             layout={ {font: {color: "#000"}, paper_bgcolor: "#eee", plot_bgcolor: "#eee", width: pW, height: pH, title: `Flights Prices from ${result.dptAprt} to ${result.dstAprt}`} }
-                        />
+                        /> */}
                         <Plot
                             data={[
                             {
@@ -44,7 +44,7 @@ class Result extends React.Component {
                             ]}
                             layout={ {font: {color: "#000"}, paper_bgcolor: "#eee", plot_bgcolor: "#eee", width: pW, height: pH, title: `Historical ${result.dptCurr} to ${result.dstCurr} Conversion Rates`} }
                         />
-                        <Plot
+                        {/* <Plot
                             data={[
                             {
                                 x: result.climDates,
@@ -64,7 +64,7 @@ class Result extends React.Component {
                             },
                             ]}
                             layout={ {font: {color: "#000"}, paper_bgcolor: "#eee", plot_bgcolor: "#eee", width: pW, height: pH, title: 'Historical Temperature & Weather Scores'} }
-                        />
+                        /> */}
                     </div>
                 </div>
             </div>

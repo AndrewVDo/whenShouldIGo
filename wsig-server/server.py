@@ -25,21 +25,6 @@ airportDB = mongoClient.airport_database
 currencyDB = mongoClient.currency_database
 
 
-class TemperatureEnum(Enum):
-    none = 0
-    freezing = 1
-    cold = 2
-    cool = 3
-    warm = 4
-    hot = 5
-
-
-class WeatherEnum(Enum):
-    none = 0
-    rainy = 1
-    sunny = 2
-
-
 @app.route('/countries', methods=["GET"])
 def countries():
     url = "https://ajayakv-rest-countries-v1.p.rapidapi.com/rest/v1/all"
@@ -106,27 +91,26 @@ def when():
     }
 
     currDates, currHist = queryCurrency(destination, departure)
-    climDates, tempScores, wthrScores = queryClimate(destination, climate)
+    stations, stationData = queryClimate(destination, climate)
     flightDates, flightPrices = queryFlights(destination, departure)
 
     return dumps({
-        'currDates' : currDates,
-        'currHist'  : currHist,
-        'climDates' : climDates,
+        'currDates'     : currDates,
+        'currHist'      : currHist,
         
-        'tempScores': tempScores,
-        'wthrScores': wthrScores,
+        'stations'      : stations,
+        'stationData'   : stationData,
 
-        'flightDates': flightDates,
-        'flightPrices': flightPrices,
+        'flightDates'   : flightDates,
+        'flightPrices'  : flightPrices,
 
-        'dstCurr'  : destination['currency'],
-        'dstCtry'  : destination['country'],
-        'dstAprt'  : destination['airport'],
+        'dstCurr'       : destination['currency'],
+        'dstCtry'       : destination['country'],
+        'dstAprt'       : destination['airport'],
 
-        'dptCurr'  : departure['currency'],
-        'dptCtry'  : departure['country'],
-        'dptAprt'  : departure['airport']
+        'dptCurr'       : departure['currency'],
+        'dptCtry'       : departure['country'],
+        'dptAprt'       : departure['airport']
     })
 
 
@@ -167,35 +151,21 @@ def getDatePoints(months):
 
 def queryClimate(destination, climate):
     assert 'airport' in destination and len(destination['airport']) == 3
+
     (lat, lon, _) = getLatLongCity(destination['airport'])
     stations = Stations()
     stations = stations.nearby(lat, lon)
-    station = stations.fetch(1)
-
-    temperatureScores = []
-    weatherScores = []
-
-    def checkPrcpAvail(prcpsData):
-        for x in samplePrcps:
-            if math.isnan(x):
-                return False
-        return True
 
     datePoints = getDatePoints(-12)
-    for i in range(len(datePoints)-1):
-        climateData = Daily(station, start=datePoints[i+1], end=datePoints[i])
+    lastYear = datePoints[-1]
+    today = datePoints[0]
+
+    stationData = []
+    for station in stations.fetch(3):
+        climateData = Daily(station, start=lastYear, end=today)
         climateData = climateData.fetch()
 
-        sampleTmps = climateData.to_dict('series')['tavg']
-        samplePrcps = climateData.to_dict('series')['prcp']
-        nSamples = len(samplePrcps)
-
-        #TODO: Ratings
-
-        temperatureScores.append(tempRating)
-        weatherScores.append(weatherRating)
-
-    return list(map(lambda date: date.strftime('%Y-%m'), datePoints)), temperatureScores, weatherScores
+    return stations, stationData
 
 
 def getCurrencyName(countryCode):

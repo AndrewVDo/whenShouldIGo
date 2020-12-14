@@ -9,13 +9,7 @@ import os
 import requests
 from dotenv import load_dotenv
 from datetime import datetime
-from ctypes import *
 import math
-
-so_file = "/app/calculate.so"
-C_FUNCTIONS = CDLL(so_file)
-C_FUNCTIONS.weatherRating.restype = c_float
-C_FUNCTIONS.temperatureRating.restype = c_float
 
 load_dotenv()
 app = Flask(__name__)
@@ -196,11 +190,7 @@ def queryClimate(destination, climate):
         samplePrcps = climateData.to_dict('series')['prcp']
         nSamples = len(samplePrcps)
 
-        tempRating = C_FUNCTIONS.temperatureRating(c_int(nSamples), (c_float * nSamples)(*sampleTmps), c_int(climate['temperature']))
-        if checkPrcpAvail(samplePrcps):
-            weatherRating = C_FUNCTIONS.weatherRating(c_int(nSamples), (c_float * nSamples)(*samplePrcps), c_int(climate['weather']))
-        else:
-            weatherRating = 0.0
+        #TODO: Ratings
 
         temperatureScores.append(tempRating)
         weatherScores.append(weatherRating)
@@ -313,7 +303,7 @@ def queryFlights(destination, departure):
         for i in range(numQuotes):
             prices[i] = c_int(quotes[i]['MinPrice'])
 
-        bestPrices.append(C_FUNCTIONS.bestFlightDates(c_int(numQuotes), prices))
+        #TODO: Ratings
     
     return dates, bestPrices
 

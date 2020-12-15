@@ -9,10 +9,18 @@ class Result extends React.Component {
         this.scrollRef = React.createRef()
     }
 
+    async componentDidMount() {
+        this.setState({
+            stationData : this.props.location.state.result.stationData
+        }, () => {
+            console.log((this.state.stationData))
+        })
+    }
+
     render() {
         let result = this.props.location.state.result;
-        let pW = 500;
-        let pH = 240;
+        let pW = 600;
+        let pH = 400;
 
         return(
             <div className="result-page">
@@ -20,18 +28,18 @@ class Result extends React.Component {
                     <Link className="link" to='/'>Back</Link>
                     <h1>When Should I Go?</h1>
                     <div ref={this.scrollRef} className="plot-scroll">
-                        {/* <Plot
+                        <Plot
                             data={[
                             {
                                 x: result.flightDates,
                                 y: result.flightPrices,
                                 type: 'scatter',
-                                mode: 'lines',
+                                mode: 'markers',
                                 marker: {color: 'black'},
                             },
                             ]}
                             layout={ {font: {color: "#000"}, paper_bgcolor: "#eee", plot_bgcolor: "#eee", width: pW, height: pH, title: `Flights Prices from ${result.dptAprt} to ${result.dstAprt}`} }
-                        /> */}
+                        />
                         <Plot
                             data={[
                             {

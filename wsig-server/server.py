@@ -97,7 +97,7 @@ def when():
         'currDates'     : currDates,
         'currHist'      : currHist,
         
-        'stations'      : stations,
+        # 'stations'      : stations,
         'stationData'   : stationData,
 
         'flightDates'   : flightDates,
@@ -159,11 +159,22 @@ def queryClimate(destination, climate):
     today = datePoints[0]
 
     stationData = []
+    stationInfo = []
     for station in stations.fetch(3):
         climateData = Daily(station, start=lastYear, end=today)
-        climateData = climateData.fetch()
+        climateData = (climateData.fetch()).to_dict('list')
 
-    return stations, stationData
+        stationData.append({
+            'tmax': climateData['tmax'],
+            'tavg': climateData['tavg'],
+            'tmin': climateData['tmin'],
+            'tsun': climateData['tsun'],
+            'prcp': climateData['prcp'],
+            'snow': climateData['snow']
+        })
+        stationInfo.append(dumps(station))
+
+    return stationInfo, stationData
 
 
 def getCurrencyName(countryCode):
@@ -266,7 +277,7 @@ def queryFlights(destination, departure):
     for yearMonth in list(map(lambda date: date.strftime('%Y-%m'), getDatePoints(12))):
         for quote in getFlightQuotes(destination, departure, yearMonth):
             flightPrices.append(quote['MinPrice'])
-            flightDates.append(quote['OutBoundLeg']['DepartureDate'])
+            flightDates.append(quote['OutboundLeg']['DepartureDate'])
     
     return flightDates, flightPrices
 

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import Plot from 'react-plotly.js';
+import StationData from './StationData'
 
 
 class Result extends React.Component {
@@ -10,11 +11,36 @@ class Result extends React.Component {
     }
 
     async componentDidMount() {
+        let stationInfo = await JSON.parse(this.props.location.state.result.stationInfo)
+        let stationData = await JSON.parse(this.props.location.state.result.stationData)
+
         this.setState({
-            stationData : this.props.location.state.result.stationData
+            stationMap: this.createStationMapping(stationInfo, stationData)
         }, () => {
-            console.log((this.state.stationData))
+            console.log(this.state)
         })
+    }
+
+    createStationMapping(stationInfo, stationData) {
+        let stationMap = {};
+        for (const [key, value] of Object.entries(stationInfo.wmo)) {
+            stationMap[key] = new StationData(stationInfo, stationData, key);
+        }
+
+        for (const [attr, attrList] of Object.entries(stationData)) {
+            for (const [label, data] of Object.entries(attrList)) {
+    
+                let i1 = 1 + label.indexOf("'");
+                let i2 = i1 + label.substring(i1).indexOf("'");
+                let i3 = 11 + label.indexOf("Timestamp");
+    
+                let stationId = label.substring(i1, i2);
+                let date = Date.parse(label.substring(i3, label.length-3));
+
+                stationMap[stationId].push(date, data, attr);
+            };
+        }
+        return stationMap;
     }
 
     render() {

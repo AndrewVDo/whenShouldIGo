@@ -9,6 +9,8 @@ import os
 import requests
 from dotenv import load_dotenv
 from datetime import datetime
+import pandas
+import numpy
 
 load_dotenv()
 app = Flask(__name__)
@@ -90,26 +92,26 @@ def when():
     }
 
     currDates, currHist = queryCurrency(destination, departure)
-    stations, stationData = queryClimate(destination, climate)
+    stationInfo, stationData = queryClimate(destination, climate)
     flightDates, flightPrices = queryFlights(destination, departure)
 
     return dumps({
-        'currDates'     : currDates,
-        'currHist'      : currHist,
-        
-        # 'stations'      : stations,
-        'stationData'   : stationData,
+        'currDates': currDates,
+        'currHist': currHist,
 
-        'flightDates'   : flightDates,
-        'flightPrices'  : flightPrices,
+        'stationInfo': stationInfo,
+        'stationData': stationData,
 
-        'dstCurr'       : destination['currency'],
-        'dstCtry'       : destination['country'],
-        'dstAprt'       : destination['airport'],
+        'flightDates': flightDates,
+        'flightPrices': flightPrices,
 
-        'dptCurr'       : departure['currency'],
-        'dptCtry'       : departure['country'],
-        'dptAprt'       : departure['airport']
+        'dstCurr': destination['currency'],
+        'dstCtry': destination['country'],
+        'dstAprt': destination['airport'],
+
+        'dptCurr': departure['currency'],
+        'dptCtry': departure['country'],
+        'dptAprt': departure['airport']
     })
 
 
@@ -158,23 +160,11 @@ def queryClimate(destination, climate):
     lastYear = datePoints[-1]
     today = datePoints[0]
 
-    stationData = []
-    stationInfo = []
-    for station in stations.fetch(3):
-        climateData = Daily(station, start=lastYear, end=today)
-        climateData = (climateData.fetch()).to_dict('list')
+    stations = stations.fetch(3)
+    climateData = Daily(stations, start=lastYear, end=today)
+    climateData = climateData.fetch()
 
-        stationData.append({
-            'tmax': climateData['tmax'],
-            'tavg': climateData['tavg'],
-            'tmin': climateData['tmin'],
-            'tsun': climateData['tsun'],
-            'prcp': climateData['prcp'],
-            'snow': climateData['snow']
-        })
-        stationInfo.append(dumps(station))
-
-    return stationInfo, stationData
+    return stations.to_json(), climateData.to_json()
 
 
 def getCurrencyName(countryCode):
@@ -217,7 +207,8 @@ def getCurrencyHistory(destinationCurrency, departureCurrency):
     assert type(departureCurrency) == str and type(destinationCurrency) == str
     assert 3 == len(departureCurrency) == len(destinationCurrency)
     currHist = []
-    currDates = list(map(lambda date: date.strftime('%Y-%m-%d'), getDatePoints(-24)))
+    currDates = list(
+        map(lambda date: date.strftime('%Y-%m-%d'), getDatePoints(-24)))
 
     for date in currDates:
         histRate = getCachedCurrencyRate(date)
@@ -240,7 +231,8 @@ def getCurrencyHistory(destinationCurrency, departureCurrency):
         if destinationCurrency not in rates or float(rates[destinationCurrency]) == 0.0:
             abort(
                 404, f'Missing or invalid currency data for {destinationCurrency} on {date}')
-        currHist.append(float(rates[destinationCurrency]) / float(rates[departureCurrency]))
+        currHist.append(
+            float(rates[destinationCurrency]) / float(rates[departureCurrency]))
 
     currDates[:] = [x[:7] for x in currDates]
     return currDates, currHist
@@ -278,7 +270,7 @@ def queryFlights(destination, departure):
         for quote in getFlightQuotes(destination, departure, yearMonth):
             flightPrices.append(quote['MinPrice'])
             flightDates.append(quote['OutboundLeg']['DepartureDate'])
-    
+
     return flightDates, flightPrices
 
 

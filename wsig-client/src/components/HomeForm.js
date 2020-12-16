@@ -179,9 +179,9 @@ class HomeForm extends React.Component {
                 <form onSubmit={this.handleSubmit}>
                     <table>
                         <thead>
-                            <th colSpan={2}>
+                            <tr><th colSpan={2}>
                                 <h1>When Should I Go?</h1>
-                            </th>
+                            </th></tr>
                         </thead>
                         <tbody>
                             <tr>

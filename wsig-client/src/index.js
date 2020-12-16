@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Root from './Root';
+import Root from './components/Root';
 import './stylesheets/Home.css'
 import BackgroundSlider from 'react-background-slider'
 import reportWebVitals from './reportWebVitals';

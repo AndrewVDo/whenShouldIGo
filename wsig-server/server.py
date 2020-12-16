@@ -95,6 +95,9 @@ def when():
     stationInfo, stationData = queryClimate(destination, climate)
     flightDates, flightPrices = queryFlights(destination, departure)
 
+    dstLat, dstLng, dstCity = getLatLongCity(destination['airport'])
+    dptLat, dptLng, dptCity = getLatLongCity(departure['airport'])
+
     return dumps({
         'currDates': currDates,
         'currHist': currHist,
@@ -108,10 +111,16 @@ def when():
         'dstCurr': destination['currency'],
         'dstCtry': destination['country'],
         'dstAprt': destination['airport'],
+        'dstLat': dstLat,
+        'dstLng': dstLng,
+        'dstCity': dstCity,
 
         'dptCurr': departure['currency'],
         'dptCtry': departure['country'],
-        'dptAprt': departure['airport']
+        'dptAprt': departure['airport'],
+        'dptLat': dptLat,
+        'dptLng': dptLng,
+        'dptCity': dptCity,
     })
 
 

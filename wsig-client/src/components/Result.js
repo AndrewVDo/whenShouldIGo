@@ -54,7 +54,7 @@ class Result extends React.Component {
             <div className="result-page">
                 <div className="result">
                     <Link className="link" to='/'>Back</Link>
-                    <h1>When Should I Go?</h1>
+                    <h1>{this.state.result.dptCity} {String.fromCharCode(8594)} {this.state.result.dstCity}</h1>
                     <div ref={this.scrollRef} className="plot-scroll">
                         <Map 
                             dptLat={this.state.result.dptLat} 

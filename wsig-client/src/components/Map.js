@@ -9,7 +9,7 @@ class Map extends React.Component {
         this.state = {
             lng: this.props.dptLng,
             lat: this.props.dptLat,
-            zoom: 7
+            zoom: 8
         }
     }
 
@@ -29,7 +29,7 @@ class Map extends React.Component {
                 ],
                 essential: true
             })
-        }, 4000)
+        }, 3000)
     }
 
     render() {

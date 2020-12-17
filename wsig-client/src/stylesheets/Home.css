@@ -51,8 +51,10 @@
 .plot-scroll {
     overflow: hidden;
     overflow-y: scroll;
+    margin-left: auto;
+    margin-right: auto;
     height: 95%;
-    width: 100%;
+    width: 90%;
 }
 
 .plot-scrol > * {
@@ -96,13 +98,15 @@ button {
 
 .link {
     text-align: left;
+    position: absolute;
     left: 0%;
+    top: 0%;
     color: white;
 }
 
 .mapContainer {
     position: relative;
-    height: 75%;
+    height: 60%;
 }
 
 .map {

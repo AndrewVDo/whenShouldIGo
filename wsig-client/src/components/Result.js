@@ -19,8 +19,6 @@ class Result extends React.Component {
 
         this.setState({
             stationMap: this.createStationMapping(stationInfo, stationData)
-        }, () => {
-            console.log(this.state)
         })
     }
 
@@ -47,8 +45,8 @@ class Result extends React.Component {
     }
 
     render() {
-        let pW = 600;
-        let pH = 400;
+        // let pW = 600;
+        // let pH = 400;
 
         return(
             <div className="result-page">
@@ -56,12 +54,17 @@ class Result extends React.Component {
                     <Link className="link" to='/'>Back</Link>
                     <div ref={this.scrollRef} className="plot-scroll">
                         <h1>{this.state.result.dptCity} {String.fromCharCode(8594)} {this.state.result.dstCity}</h1>
-                        <Map 
-                            dptLat={this.state.result.dptLat} 
-                            dptLng={this.state.result.dptLng} 
-                            dstLat={this.state.result.dstLat} 
-                            dstLng={this.state.result.dstLng}
-                        />
+
+                        {this.state.stationMap && (
+                            <Map 
+                                stationMap={this.state.stationMap}
+                                dptLat={this.state.result.dptLat} 
+                                dptLng={this.state.result.dptLng} 
+                                dstLat={this.state.result.dstLat} 
+                                dstLng={this.state.result.dstLng}
+                            />
+                        )}
+
                         {/* <Plot
                             data={[
                             {

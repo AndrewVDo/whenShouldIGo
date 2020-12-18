@@ -61,6 +61,7 @@ class HomeForm extends React.Component {
         }
         catch(error) {
             console.log(error)
+            alert("The country list could not be fetched from server!")
         }
     }
 
@@ -74,6 +75,7 @@ class HomeForm extends React.Component {
         }
         catch(error) {
             console.log(error)
+            alert("The airport list could not be fetched from server")
         }
     }
 
@@ -107,11 +109,17 @@ class HomeForm extends React.Component {
             goMessage : "Loading..."
         });
         
-        let result = await this.whenRequest();
-        this.setState({
-            goMessage : "Go!",
-            result: result
-        })
+        try {
+            let result = await this.whenRequest();
+            this.setState({
+                goMessage : "Go!",
+                result: result
+            })
+        }
+        catch(error) {
+            console.log(error)
+            alert("Sorry that request didn't work please try another one!")
+        }
     }
 
     async departureCountryChange(option) {

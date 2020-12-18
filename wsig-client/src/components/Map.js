@@ -11,6 +11,8 @@ class Map extends React.Component {
             lat: this.props.dptLat,
             zoom: 8
         }
+
+        this.markWeatherStations = this.markWeatherStations.bind(this)
     }
 
     async componentDidMount() {
@@ -21,6 +23,8 @@ class Map extends React.Component {
           zoom: this.state.zoom
         });
 
+        this.markWeatherStations(map, this.props.stationMap)
+
         setTimeout(() => {
             map.flyTo({
                 center: [
@@ -30,6 +34,18 @@ class Map extends React.Component {
                 essential: true
             })
         }, 3000)
+    }
+    
+    markWeatherStations(map, stationMap) {
+      if(!map || !stationMap) {
+        return;
+      }
+
+      for ( const[stationId, stationData] of Object.entries(stationMap)) {
+        new mapboxgl.Marker()
+          .setLngLat([stationData.longitude, stationData.latitude])
+          .addTo(map)
+      }
     }
 
     render() {

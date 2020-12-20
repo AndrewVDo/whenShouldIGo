@@ -9,13 +9,8 @@ import os
 import requests
 from dotenv import load_dotenv
 from datetime import datetime
-from ctypes import *
-import math
-
-so_file = "/app/calculate.so"
-C_FUNCTIONS = CDLL(so_file)
-C_FUNCTIONS.weatherRating.restype = c_float
-C_FUNCTIONS.temperatureRating.restype = c_float
+import pandas
+import numpy
 
 load_dotenv()
 app = Flask(__name__)
@@ -29,21 +24,6 @@ mongoClient = pymongo.MongoClient(
     f'mongodb+srv://Andrew:{mongoPW}@cluster0.dcy2n.mongodb.net/?retryWrites=true&w=majority')
 airportDB = mongoClient.airport_database
 currencyDB = mongoClient.currency_database
-
-
-class TemperatureEnum(Enum):
-    none = 0
-    freezing = 1
-    cold = 2
-    cool = 3
-    warm = 4
-    hot = 5
-
-
-class WeatherEnum(Enum):
-    none = 0
-    rainy = 1
-    sunny = 2
 
 
 @app.route('/countries', methods=["GET"])
@@ -112,27 +92,35 @@ def when():
     }
 
     currDates, currHist = queryCurrency(destination, departure)
-    climDates, tempScores, wthrScores = queryClimate(destination, climate)
+    stationInfo, stationData = queryClimate(destination, climate)
     flightDates, flightPrices = queryFlights(destination, departure)
 
+    dstLat, dstLng, dstCity = getLatLongCity(destination['airport'])
+    dptLat, dptLng, dptCity = getLatLongCity(departure['airport'])
+
     return dumps({
-        'currDates' : currDates,
-        'currHist'  : currHist,
-        'climDates' : climDates,
-        
-        'tempScores': tempScores,
-        'wthrScores': wthrScores,
+        'currDates': currDates,
+        'currHist': currHist,
+
+        'stationInfo': stationInfo,
+        'stationData': stationData,
 
         'flightDates': flightDates,
         'flightPrices': flightPrices,
 
-        'dstCurr'  : destination['currency'],
-        'dstCtry'  : destination['country'],
-        'dstAprt'  : destination['airport'],
+        'dstCurr': destination['currency'],
+        'dstCtry': destination['country'],
+        'dstAprt': destination['airport'],
+        'dstLat': dstLat,
+        'dstLng': dstLng,
+        'dstCity': dstCity,
 
-        'dptCurr'  : departure['currency'],
-        'dptCtry'  : departure['country'],
-        'dptAprt'  : departure['airport']
+        'dptCurr': departure['currency'],
+        'dptCtry': departure['country'],
+        'dptAprt': departure['airport'],
+        'dptLat': dptLat,
+        'dptLng': dptLng,
+        'dptCity': dptCity,
     })
 
 
@@ -161,7 +149,6 @@ def getDatePoints(months):
             return datetime(tPoint.year+1, 1, 1)
         return datetime(tPoint.year, tPoint.month+1, 1)
 
-    today = datetime.today()
     tPoints = [datetime.today()]
     for m in range(abs(months)):
         if months > 0:
@@ -173,39 +160,20 @@ def getDatePoints(months):
 
 def queryClimate(destination, climate):
     assert 'airport' in destination and len(destination['airport']) == 3
+
     (lat, lon, _) = getLatLongCity(destination['airport'])
     stations = Stations()
     stations = stations.nearby(lat, lon)
-    station = stations.fetch(1)
-
-    temperatureScores = []
-    weatherScores = []
-
-    def checkPrcpAvail(prcpsData):
-        for x in samplePrcps:
-            if math.isnan(x):
-                return False
-        return True
 
     datePoints = getDatePoints(-12)
-    for i in range(len(datePoints)-1):
-        climateData = Daily(station, start=datePoints[i+1], end=datePoints[i])
-        climateData = climateData.fetch()
+    lastYear = datePoints[-1]
+    today = datePoints[0]
 
-        sampleTmps = climateData.to_dict('series')['tavg']
-        samplePrcps = climateData.to_dict('series')['prcp']
-        nSamples = len(samplePrcps)
+    stations = stations.fetch(3)
+    climateData = Daily(stations, start=lastYear, end=today)
+    climateData = climateData.fetch()
 
-        tempRating = C_FUNCTIONS.temperatureRating(c_int(nSamples), (c_float * nSamples)(*sampleTmps), c_int(climate['temperature']))
-        if checkPrcpAvail(samplePrcps):
-            weatherRating = C_FUNCTIONS.weatherRating(c_int(nSamples), (c_float * nSamples)(*samplePrcps), c_int(climate['weather']))
-        else:
-            weatherRating = 0.0
-
-        temperatureScores.append(tempRating)
-        weatherScores.append(weatherRating)
-
-    return list(map(lambda date: date.strftime('%Y-%m'), datePoints)), temperatureScores, weatherScores
+    return stations.to_json(), climateData.to_json()
 
 
 def getCurrencyName(countryCode):
@@ -248,7 +216,8 @@ def getCurrencyHistory(destinationCurrency, departureCurrency):
     assert type(departureCurrency) == str and type(destinationCurrency) == str
     assert 3 == len(departureCurrency) == len(destinationCurrency)
     currHist = []
-    currDates = list(map(lambda date: date.strftime('%Y-%m-%d'), getDatePoints(-24)))
+    currDates = list(
+        map(lambda date: date.strftime('%Y-%m-%d'), getDatePoints(-24)))
 
     for date in currDates:
         histRate = getCachedCurrencyRate(date)
@@ -271,7 +240,8 @@ def getCurrencyHistory(destinationCurrency, departureCurrency):
         if destinationCurrency not in rates or float(rates[destinationCurrency]) == 0.0:
             abort(
                 404, f'Missing or invalid currency data for {destinationCurrency} on {date}')
-        currHist.append(float(rates[destinationCurrency]) / float(rates[departureCurrency]))
+        currHist.append(
+            float(rates[destinationCurrency]) / float(rates[departureCurrency]))
 
     currDates[:] = [x[:7] for x in currDates]
     return currDates, currHist
@@ -302,20 +272,15 @@ def getFlightQuotes(destination, departure, date="anytime"):
 
 
 def queryFlights(destination, departure):
-    bestPrices = []
-    dates = list(map(lambda date: date.strftime('%Y-%m'), getDatePoints(12)))
+    flightDates = []
+    flightPrices = []
 
-    for date in dates:
-        quotes = getFlightQuotes(destination, departure, date)
-        
-        numQuotes = len(quotes)
-        prices = (c_int * numQuotes)()
-        for i in range(numQuotes):
-            prices[i] = c_int(quotes[i]['MinPrice'])
+    for yearMonth in list(map(lambda date: date.strftime('%Y-%m'), getDatePoints(12))):
+        for quote in getFlightQuotes(destination, departure, yearMonth):
+            flightPrices.append(quote['MinPrice'])
+            flightDates.append(quote['OutboundLeg']['DepartureDate'])
 
-        bestPrices.append(C_FUNCTIONS.bestFlightDates(c_int(numQuotes), prices))
-    
-    return dates, bestPrices
+    return flightDates, flightPrices
 
 
 if __name__ == "__main__":

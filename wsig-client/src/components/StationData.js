@@ -23,6 +23,8 @@ class StationData {
         this.distance = stationInfo.distance[ix];
         this.elevation = stationInfo.elevation[ix];
 
+        this.popup = document.createElement('div'); //used to update popup on map
+
         this.push = this.push.bind(this);
         
     }

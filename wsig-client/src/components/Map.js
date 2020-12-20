@@ -11,10 +11,8 @@ class Map extends React.Component {
         this.state = {
             lng: this.props.dptLng,
             lat: this.props.dptLat,
-            zoom: 8
+            zoom: 8,
         }
-
-        this.markWeatherStations = this.markWeatherStations.bind(this)
     }
 
     async componentDidMount() {
@@ -26,7 +24,7 @@ class Map extends React.Component {
         });
 
         this.markWeatherStations(map, this.props.stationMap)
-
+        
         setTimeout(() => {
             map.flyTo({
                 center: [
@@ -37,25 +35,34 @@ class Map extends React.Component {
             })
         }, 3000)
     }
-    
+
+    componentDidUpdate() {
+      this.updateWeatherStations(this.props.stationMap)
+    }
+
     markWeatherStations(map, stationMap) {
       if(!map || !stationMap) {
         return;
       }
 
       for ( const[stationId, stationData] of Object.entries(stationMap)) {
-        const placeholder = document.createElement('div');
-        ReactDOM.render(<MapPopup 
-          stationData={stationData} 
-          month={3}
-        />, placeholder);
-
         new mapboxgl.Marker()
           .setLngLat([stationData.longitude, stationData.latitude])
           .setPopup(new mapboxgl.Popup({offset:25})
-            .setDOMContent(placeholder))
+            .setDOMContent(stationData.popup))
           .addTo(map)
 
+      }
+
+      this.updateWeatherStations(stationMap)
+    }
+
+    updateWeatherStations(stationMap) {
+      for ( const[stationId, stationData] of Object.entries(stationMap)) {
+        ReactDOM.render(<MapPopup 
+          stationData={stationData} 
+          month={this.props.month}
+        />, stationData.popup);
       }
     }
 

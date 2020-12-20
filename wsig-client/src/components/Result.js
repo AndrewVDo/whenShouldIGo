@@ -3,14 +3,18 @@ import { Link } from 'react-router-dom'
 import Plot from 'react-plotly.js';
 import StationData from './StationData'
 import Map from './Map'
+import MonthSlider from './MonthSlider'
 
 class Result extends React.Component {
     constructor(props) {
         super(props)
         this.scrollRef = React.createRef()
         this.state = {
-            result : this.props.location.state.result
+            result : this.props.location.state.result,
+            month : 0
         }
+
+        this.setMonth = this.setMonth.bind(this)
     }
 
     async componentDidMount() {
@@ -44,6 +48,13 @@ class Result extends React.Component {
         return stationMap;
     }
 
+    setMonth(month) {
+        month += (month < 0) ? 12 : 0
+        this.setState({
+            month: month % 12
+        })
+    }
+
     render() {
         // let pW = 600;
         // let pH = 400;
@@ -55,6 +66,8 @@ class Result extends React.Component {
                     <div ref={this.scrollRef} className="plot-scroll">
                         <h1>{this.state.result.dptCity} {String.fromCharCode(8594)} {this.state.result.dstCity}</h1>
 
+                        <MonthSlider month={this.state.month} setMonth={this.setMonth}></MonthSlider>
+
                         {this.state.stationMap && (
                             <Map 
                                 stationMap={this.state.stationMap}
@@ -62,6 +75,7 @@ class Result extends React.Component {
                                 dptLng={this.state.result.dptLng} 
                                 dstLat={this.state.result.dstLat} 
                                 dstLng={this.state.result.dstLng}
+                                month={this.state.month}
                             />
                         )}
 

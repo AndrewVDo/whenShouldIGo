@@ -131,3 +131,22 @@ h2 {
     margin-right: auto;
     padding: 5px 20px;
 }
+
+.month-slider {
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+.month-slider > * {
+    color: rgb(206, 211, 212);
+    display: inline;
+
+    border: 1px solid rgb(110, 110, 110);
+    background-color: black;
+    width: fit-content;
+    padding: 5px 20px;
+}
+
+.month-slider > button {
+    font-size: 23px;
+}

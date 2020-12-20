@@ -10,8 +10,8 @@ class Result extends React.Component {
         super(props)
         this.state = {
             stationMap: null,
-            result : this.props.location.state.result,
-            month : 0
+            result: this.props.location.state.result,
+            month: 0
         }
 
         this.setMonth = this.setMonth.bind(this)
@@ -31,7 +31,7 @@ class Result extends React.Component {
     }
 
     createStationMapping(stationInfo, stationData) {
-        if(!stationInfo || !stationData) {
+        if (!stationInfo || !stationData) {
             return null;
         }
 
@@ -42,13 +42,13 @@ class Result extends React.Component {
 
         for (const [attr, attrList] of Object.entries(stationData)) {
             for (const [label, data] of Object.entries(attrList)) {
-    
+
                 let i1 = 1 + label.indexOf("'");
                 let i2 = i1 + label.substring(i1).indexOf("'");
                 let i3 = 11 + label.indexOf("Timestamp");
-    
+
                 let stationId = label.substring(i1, i2);
-                let date = new Date(Date.parse(label.substring(i3, label.length-3)))
+                let date = new Date(Date.parse(label.substring(i3, label.length - 3)))
 
                 stationMap[stationId].push(date, data, attr);
             };
@@ -70,7 +70,7 @@ class Result extends React.Component {
             stationMap
         } = this.state
 
-        return(
+        return (
             <div className="result-page">
                 <div className="result">
                     <Link className="link" to='/'>Back</Link>
@@ -80,11 +80,11 @@ class Result extends React.Component {
                         <MonthSlider month={month} setMonth={this.setMonth}></MonthSlider>
 
                         {stationMap && (
-                            <Map 
+                            <Map
                                 stationMap={stationMap}
-                                dptLat={result.dptLat} 
-                                dptLng={result.dptLng} 
-                                dstLat={result.dstLat} 
+                                dptLat={result.dptLat}
+                                dptLng={result.dptLng}
+                                dstLat={result.dstLat}
                                 dstLng={result.dstLng}
                                 month={month}
                             />

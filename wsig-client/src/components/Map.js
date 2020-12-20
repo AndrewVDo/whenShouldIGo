@@ -17,14 +17,14 @@ class Map extends React.Component {
 
     async componentDidMount() {
         const map = new mapboxgl.Map({
-          container: this.mapContainer,
-          style: 'mapbox://styles/mapbox/streets-v11',
-          center: [this.state.lng, this.state.lat],
-          zoom: this.state.zoom
+            container: this.mapContainer,
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [this.state.lng, this.state.lat],
+            zoom: this.state.zoom
         });
 
         this.markWeatherStations(map, this.props.stationMap)
-        
+
         setTimeout(() => {
             map.flyTo({
                 center: [
@@ -37,42 +37,42 @@ class Map extends React.Component {
     }
 
     componentDidUpdate() {
-      this.updateWeatherStations(this.props.stationMap)
+        this.updateWeatherStations(this.props.stationMap)
     }
 
     markWeatherStations(map, stationMap) {
-      if(!map || !stationMap) {
-        return;
-      }
+        if (!map || !stationMap) {
+            return;
+        }
 
-      for ( const[stationId, stationData] of Object.entries(stationMap)) {
-        new mapboxgl.Marker()
-          .setLngLat([stationData.longitude, stationData.latitude])
-          .setPopup(new mapboxgl.Popup({offset:25})
-            .setDOMContent(stationData.popup))
-          .addTo(map)
+        for (const [stationId, stationData] of Object.entries(stationMap)) {
+            new mapboxgl.Marker()
+                .setLngLat([stationData.longitude, stationData.latitude])
+                .setPopup(new mapboxgl.Popup({ offset: 25 })
+                    .setDOMContent(stationData.popup))
+                .addTo(map)
 
-      }
+        }
 
-      this.updateWeatherStations(stationMap)
+        this.updateWeatherStations(stationMap)
     }
 
     updateWeatherStations(stationMap) {
-      for ( const[stationId, stationData] of Object.entries(stationMap)) {
-        ReactDOM.render(<MapPopup 
-          stationData={stationData} 
-          month={this.props.month}
-        />, stationData.popup);
-      }
+        for (const [stationId, stationData] of Object.entries(stationMap)) {
+            ReactDOM.render(<MapPopup
+                stationData={stationData}
+                month={this.props.month}
+            />, stationData.popup);
+        }
     }
 
     render() {
         return (
-          <div className="mapContainer">
-            <div ref={el => this.mapContainer = el} className="map"/>
-          </div>
+            <div className="mapContainer">
+                <div ref={el => this.mapContainer = el} className="map" />
+            </div>
         )
-      }
+    }
 }
 
 export default Map;

@@ -8,12 +8,12 @@ import {
 import HomeForm from './HomeForm'
 import Result from './Result'
 
-class Root extends React.Component {    
+class Root extends React.Component {
     render() {
-        return(
+        return (
             <Router>
                 <Switch>
-                    <Route path='/whenShouldIGo' render={(props) => <Result {...props}/>}/>
+                    <Route path='/whenShouldIGo' render={(props) => <Result {...props} />} />
                     <Route path='/'>
                         <HomeForm></HomeForm>
                     </Route>

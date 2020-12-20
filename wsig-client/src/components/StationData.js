@@ -26,11 +26,11 @@ class StationData {
         this.popup = document.createElement('div'); //used to update popup on map
 
         this.push = this.push.bind(this);
-        
+
     }
 
     push(date, data, attr) {
-        if(!(attr in this)) {
+        if (!(attr in this)) {
             this[attr] = new DateData();
         }
 

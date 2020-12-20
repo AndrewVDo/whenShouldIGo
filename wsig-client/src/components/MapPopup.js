@@ -2,19 +2,12 @@ import React from 'react';
 import Plot from 'react-plotly.js';
 
 class MapPopup extends React.Component {
-    constructor(props) {
-        super(props)
-
-        this.categorizeTemp = this.categorizeTemp.bind(this);
-    }
-
     categorizeTemp(avgTemp, month) {
         if(!avgTemp || !avgTemp.data || avgTemp.data.length == 0) {
             return null;
         }
 
         let temp = [0, 0, 0, 0, 0, 0]
-
         for(let i=0; i<avgTemp.data.length; i++) {
             if(avgTemp.date[i].getMonth() == month) {
                 if(avgTemp.data[i] >= 20.0) {
@@ -37,18 +30,23 @@ class MapPopup extends React.Component {
                 }
             }
         }
-
         return temp;
     }
 
     render() {
-        const tempCat = this.categorizeTemp(this.props.stationData.tavg, this.props.month)
+        const {
+            stationData,
+            month
+        } = this.props;
+        const tempCat = this.categorizeTemp(stationData.tavg, month)
 
         return(<div className="map-popup">
             <h2>
                 {this.props.stationData.name}
             </h2>
-            
+
+            {!tempCat && (<p>Temperature Information Unavailable</p>)}
+
             {tempCat && (<Plot
                 data={[
                 {
@@ -92,8 +90,6 @@ class MapPopup extends React.Component {
                     ]
                 }}
             />)}
-
-            {!tempCat && (<p>Temperature Information Unavailable</p>)}
         </div>)
     }
 }

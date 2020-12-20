@@ -1,5 +1,7 @@
 import React from 'react';
+import ReactDOM from 'react-dom'
 import mapboxgl from 'mapbox-gl';
+import MapPopup from './MapPopup'
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
 
@@ -42,9 +44,18 @@ class Map extends React.Component {
       }
 
       for ( const[stationId, stationData] of Object.entries(stationMap)) {
+        const placeholder = document.createElement('div');
+        ReactDOM.render(<MapPopup 
+          stationData={stationData} 
+          month={3}
+        />, placeholder);
+
         new mapboxgl.Marker()
           .setLngLat([stationData.longitude, stationData.latitude])
+          .setPopup(new mapboxgl.Popup({offset:25})
+            .setDOMContent(placeholder))
           .addTo(map)
+
       }
     }
 

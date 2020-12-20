@@ -219,8 +219,8 @@ class HomeForm extends React.Component {
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td><button type="button" onClick={this.handleReset}>Reset</button></td>
-                                <td><button type="button" onClick={this.handleSubmit}>{this.state.goMessage}</button></td>
+                                <td><button className="homeButton" type="button" onClick={this.handleReset}>Reset</button></td>
+                                <td><button className="homeButton" type="button" onClick={this.handleSubmit}>{this.state.goMessage}</button></td>
                             </tr>
                         </tfoot>
                     </table>

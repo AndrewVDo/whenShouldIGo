@@ -36,7 +36,7 @@ class Result extends React.Component {
                 let i3 = 11 + label.indexOf("Timestamp");
     
                 let stationId = label.substring(i1, i2);
-                let date = Date.parse(label.substring(i3, label.length-3));
+                let date = new Date(Date.parse(label.substring(i3, label.length-3)))
 
                 stationMap[stationId].push(date, data, attr);
             };

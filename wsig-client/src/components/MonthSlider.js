@@ -1,6 +1,13 @@
 import React from 'react'
 
 class MonthSlider extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.nextMonth = this.nextMonth.bind(this);
+        this.prevMonth = this.prevMonth.bind(this);
+    }
+
     nextMonth() {
         const { month } = this.props;
         this.props.setMonth(month + 1);

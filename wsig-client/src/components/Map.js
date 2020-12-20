@@ -48,7 +48,7 @@ class Map extends React.Component {
         for (const [stationId, stationData] of Object.entries(stationMap)) {
             new mapboxgl.Marker()
                 .setLngLat([stationData.longitude, stationData.latitude])
-                .setPopup(new mapboxgl.Popup({ offset: 25 })
+                .setPopup(new mapboxgl.Popup({ offset: 5 })
                     .setDOMContent(stationData.popup))
                 .addTo(map)
 

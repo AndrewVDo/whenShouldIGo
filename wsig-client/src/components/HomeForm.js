@@ -61,6 +61,7 @@ class HomeForm extends React.Component {
         }
         catch(error) {
             console.log(error)
+            alert("The country list could not be fetched from server!")
         }
     }
 
@@ -74,6 +75,7 @@ class HomeForm extends React.Component {
         }
         catch(error) {
             console.log(error)
+            alert("The airport list could not be fetched from server")
         }
     }
 
@@ -107,11 +109,17 @@ class HomeForm extends React.Component {
             goMessage : "Loading..."
         });
         
-        let result = await this.whenRequest();
-        this.setState({
-            goMessage : "Go!",
-            result: result
-        })
+        try {
+            let result = await this.whenRequest();
+            this.setState({
+                goMessage : "Go!",
+                result: result
+            })
+        }
+        catch(error) {
+            console.log(error)
+            alert("Sorry that request didn't work please try another one!")
+        }
     }
 
     async departureCountryChange(option) {
@@ -179,9 +187,9 @@ class HomeForm extends React.Component {
                 <form onSubmit={this.handleSubmit}>
                     <table>
                         <thead>
-                            <th colSpan={2}>
+                            <tr><th colSpan={2}>
                                 <h1>When Should I Go?</h1>
-                            </th>
+                            </th></tr>
                         </thead>
                         <tbody>
                             <tr>
@@ -211,8 +219,8 @@ class HomeForm extends React.Component {
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td><button type="button" onClick={this.handleReset}>Reset</button></td>
-                                <td><button type="button" onClick={this.handleSubmit}>{this.state.goMessage}</button></td>
+                                <td><button className="homeButton" type="button" onClick={this.handleReset}>Reset</button></td>
+                                <td><button className="homeButton" type="button" onClick={this.handleSubmit}>{this.state.goMessage}</button></td>
                             </tr>
                         </tfoot>
                     </table>

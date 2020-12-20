@@ -8,8 +8,8 @@ import MonthSlider from './MonthSlider'
 class Result extends React.Component {
     constructor(props) {
         super(props)
-        this.scrollRef = React.createRef()
         this.state = {
+            stationMap: null,
             result : this.props.location.state.result,
             month : 0
         }
@@ -18,8 +18,12 @@ class Result extends React.Component {
     }
 
     async componentDidMount() {
-        let stationInfo = await JSON.parse(this.state.result.stationInfo)
-        let stationData = await JSON.parse(this.state.result.stationData)
+        const {
+            result
+        } = this.state;
+
+        let stationInfo = await JSON.parse(result.stationInfo);
+        let stationData = await JSON.parse(result.stationData);
 
         this.setState({
             stationMap: this.createStationMapping(stationInfo, stationData)
@@ -27,6 +31,10 @@ class Result extends React.Component {
     }
 
     createStationMapping(stationInfo, stationData) {
+        if(!stationInfo || !stationData) {
+            return null;
+        }
+
         let stationMap = {};
         for (const [key, value] of Object.entries(stationInfo.wmo)) {
             stationMap[key] = new StationData(stationInfo, stationData, key);
@@ -56,34 +64,37 @@ class Result extends React.Component {
     }
 
     render() {
-        // let pW = 600;
-        // let pH = 400;
+        const {
+            result,
+            month,
+            stationMap
+        } = this.state
 
         return(
             <div className="result-page">
                 <div className="result">
                     <Link className="link" to='/'>Back</Link>
                     <div ref={this.scrollRef} className="plot-scroll">
-                        <h1>{this.state.result.dptCity} {String.fromCharCode(8594)} {this.state.result.dstCity}</h1>
+                        <h1>{result.dptCity} {String.fromCharCode(8594)} {result.dstCity}</h1>
 
-                        <MonthSlider month={this.state.month} setMonth={this.setMonth}></MonthSlider>
+                        <MonthSlider month={month} setMonth={this.setMonth}></MonthSlider>
 
-                        {this.state.stationMap && (
+                        {stationMap && (
                             <Map 
-                                stationMap={this.state.stationMap}
-                                dptLat={this.state.result.dptLat} 
-                                dptLng={this.state.result.dptLng} 
-                                dstLat={this.state.result.dstLat} 
-                                dstLng={this.state.result.dstLng}
-                                month={this.state.month}
+                                stationMap={stationMap}
+                                dptLat={result.dptLat} 
+                                dptLng={result.dptLng} 
+                                dstLat={result.dstLat} 
+                                dstLng={result.dstLng}
+                                month={month}
                             />
                         )}
 
                         {/* <Plot
                             data={[
                             {
-                                x: this.state.result.flightDates,
-                                y: this.state.result.flightPrices,
+                                x: result.flightDates,
+                                y: result.flightPrices,
                                 type: 'scatter',
                                 mode: 'markers',
                                 marker: {color: 'black'},
@@ -94,35 +105,14 @@ class Result extends React.Component {
                         <Plot
                             data={[
                             {
-                                x: this.state.result.currDates,
-                                y: this.state.result.currHist,
+                                x: result.currDates,
+                                y: result.currHist,
                                 type: 'scatter',
                                 mode: 'lines',
                                 marker: {color: 'green'},
                             },
                             ]}
                             layout={ {font: {color: "#000"}, paper_bgcolor: "#eee", plot_bgcolor: "#eee", width: pW, height: pH, title: `Historical ${result.dptCurr} to ${result.dstCurr} Conversion Rates`} }
-                        /> */}
-                        {/* <Plot
-                            data={[
-                            {
-                                x: this.state.result.climDates,
-                                y: this.state.result.tempScores,
-                                type: 'scatter',
-                                mode: 'lines',
-                                marker: {color: 'red'},
-                                name: "Temp."
-                            },
-                            {
-                                x: this.state.result.climDates,
-                                y: this.state.result.wthrScores,
-                                type: 'scatter',
-                                mode: 'lines',
-                                marker: {color: 'blue'},
-                                name: "Weather"
-                            },
-                            ]}
-                            layout={ {font: {color: "#000"}, paper_bgcolor: "#eee", plot_bgcolor: "#eee", width: pW, height: pH, title: 'Historical Temperature & Weather Scores'} }
                         /> */}
                     </div>
                 </div>

@@ -59,10 +59,6 @@
     align-items: center;
 }
 
-.plot-scroll > * {
-    padding: 0px;
-}
-
 h1 {
     color: rgb(206, 211, 212);
     font-family: 'BebasNeue', monospace;

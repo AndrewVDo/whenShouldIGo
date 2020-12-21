@@ -5,6 +5,7 @@
 
 * {
     font-family: 'BebasNeue', monospace;
+    letter-spacing: 3px;
 }
 
 .home-form, .result-page {
@@ -51,10 +52,11 @@
 .plot-scroll {
     overflow: hidden;
     overflow-y: scroll;
-    margin-left: auto;
-    margin-right: auto;
-    height: 95%;
+    height: 100%;
     width: 90%;
+    padding-left: 5%;
+    padding-right: 5%;
+    align-items: center;
 }
 
 .plot-scroll > * {
@@ -107,12 +109,16 @@ h1 {
 .mapContainer {
     position: relative;
     height: 70%;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .map {
     position: relative;
     height: 100%;
     width: 100%;
+    border: 1px solid #eee;
+
 }
 
 .map-popup {
@@ -149,4 +155,8 @@ h2 {
 
 .month-slider > button {
     font-size: 23px;
+}
+
+.plot {
+    border: 1px solid #eee;
 }

@@ -72,7 +72,7 @@ class MapPopup extends React.Component {
                     annotations: [
                         {
                             font: {
-                                size: 14
+                                size: 10,
                             },
                             showarrow: false,
                             text: 'Temperature',

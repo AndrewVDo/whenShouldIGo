@@ -157,7 +157,7 @@ def queryClimate(destination):
     lastYear = datePoints[-1]
     today = datePoints[0]
 
-    stations = stations.fetch(3)
+    stations = stations.fetch(6)
     climateData = Daily(stations, start=lastYear, end=today)
     climateData = climateData.fetch()
 

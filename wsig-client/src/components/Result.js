@@ -11,9 +11,11 @@ class Result extends React.Component {
         this.state = {
             stationMap: null,
             result: this.props.location.state.result,
-            month: 0
+            month: 0,
+            plotWidth: 200
         }
 
+        this.scrollRef = React.createRef();
         this.setMonth = this.setMonth.bind(this)
     }
 
@@ -26,7 +28,8 @@ class Result extends React.Component {
         let stationData = await JSON.parse(result.stationData);
 
         this.setState({
-            stationMap: this.createStationMapping(stationInfo, stationData)
+            stationMap: this.createStationMapping(stationInfo, stationData),
+            plotWidth: this.scrollRef.current.offsetWidth
         })
     }
 
@@ -67,7 +70,8 @@ class Result extends React.Component {
         const {
             result,
             month,
-            stationMap
+            stationMap,
+            plotWidth
         } = this.state
 
         return (
@@ -90,30 +94,48 @@ class Result extends React.Component {
                             />
                         )}
 
-                        {/* <Plot
+                        <Plot
+                            className="plot"
                             data={[
-                            {
-                                x: result.flightDates,
-                                y: result.flightPrices,
-                                type: 'scatter',
-                                mode: 'markers',
-                                marker: {color: 'black'},
-                            },
+                                {
+                                    x: result.flightDates,
+                                    y: result.flightPrices,
+                                    type: 'bar',
+                                    mode: 'markers',
+                                    marker: { color: 'lightblue' },
+                                },
                             ]}
-                            layout={ {font: {color: "#000"}, paper_bgcolor: "#eee", plot_bgcolor: "#eee", width: pW, height: pH, title: `Flights Prices from ${result.dptAprt} to ${result.dstAprt}`} }
+                            layout={{
+                                margin: { "t": 60, "b": 30, "l": 50, "r": 30 },
+                                font: { color: "#fff" },
+                                paper_bgcolor: "#333",
+                                plot_bgcolor: "#333",
+                                width: plotWidth * 0.9 - 1,
+                                height: plotWidth / 4,
+                                title: `Flights Prices from ${result.dptCity} to ${result.dstCity}`
+                            }}
                         />
                         <Plot
+                            className="plot"
                             data={[
-                            {
-                                x: result.currDates,
-                                y: result.currHist,
-                                type: 'scatter',
-                                mode: 'lines',
-                                marker: {color: 'green'},
-                            },
+                                {
+                                    x: result.currDates,
+                                    y: result.currHist,
+                                    type: 'scatter',
+                                    mode: 'lines',
+                                    marker: { color: 'lightgreen' },
+                                },
                             ]}
-                            layout={ {font: {color: "#000"}, paper_bgcolor: "#eee", plot_bgcolor: "#eee", width: pW, height: pH, title: `Historical ${result.dptCurr} to ${result.dstCurr} Conversion Rates`} }
-                        /> */}
+                            layout={{
+                                margin: { "t": 60, "b": 30, "l": 50, "r": 30 },
+                                font: { color: "#fff" },
+                                paper_bgcolor: "#333",
+                                plot_bgcolor: "#333",
+                                width: plotWidth * 0.9 - 1,
+                                height: plotWidth / 4,
+                                title: `${result.dptCurr} ${String.fromCharCode(8594)} ${result.dstCurr} Conversion Rates`
+                            }}
+                        />
                     </div>
                 </div>
             </div>

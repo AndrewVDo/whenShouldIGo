@@ -70,14 +70,6 @@ def when():
     if not destinationAirport or len(destinationAirport) != 3:
         abort(400, 'invalid destination airport')
 
-    temperature = int(request.args.get('temperature'))
-    if temperature < 0 or temperature > 5:
-        abort(400, 'invalid temperature request')
-
-    weather = int(request.args.get('weather'))
-    if weather < 0 or weather > 2:
-        abort(400, 'invalid weather request')
-
     departure = {
         'airport': departureAirport,
         'country': departureCountry
@@ -86,13 +78,9 @@ def when():
         'airport': destinationAirport,
         'country': destinationCountry
     }
-    climate = {
-        'temperature': temperature,
-        'weather': weather
-    }
 
     currDates, currHist = queryCurrency(destination, departure)
-    stationInfo, stationData = queryClimate(destination, climate)
+    stationInfo, stationData = queryClimate(destination)
     flightDates, flightPrices = queryFlights(destination, departure)
 
     dstLat, dstLng, dstCity = getLatLongCity(destination['airport'])
@@ -158,7 +146,7 @@ def getDatePoints(months):
     return tPoints
 
 
-def queryClimate(destination, climate):
+def queryClimate(destination):
     assert 'airport' in destination and len(destination['airport']) == 3
 
     (lat, lon, _) = getLatLongCity(destination['airport'])

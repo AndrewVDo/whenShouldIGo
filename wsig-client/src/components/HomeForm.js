@@ -2,24 +2,6 @@ import React from 'react'
 import Select from 'react-select'
 import { Redirect } from 'react-router-dom'
 
-const temperatureOptions = [
-    { label: "None", value: 0 },
-    { label: "Freezing", value: 1 },
-    { label: "Cold", value: 2 },
-    { label: "Cool", value: 3 },
-    { label: "Warm", value: 4 },
-    { label: "Hot", value: 5 }
-];
-
-const weatherOptions = [
-    { label: "None", value: 0 },
-    { label: "Rainy", value: 1 },
-    { label: "Sunny", value: 2 }
-];
-
-Object.freeze(temperatureOptions);
-Object.freeze(weatherOptions);
-
 class HomeForm extends React.Component {
     constructor(props) {
         super(props);
@@ -28,8 +10,6 @@ class HomeForm extends React.Component {
             departure: null,
             destinationCountry: null,
             destination: null,
-            preferredTemperature: null,
-            preferredWeather: null,
             countryList: [],
             departureAirports: [],
             destinationAirports: [],
@@ -43,8 +23,6 @@ class HomeForm extends React.Component {
         this.departureChange = this.departureChange.bind(this);
         this.destinationCountryChange = this.destinationCountryChange.bind(this)
         this.destinationChange = this.destinationChange.bind(this);
-        this.temperatureChange = this.temperatureChange.bind(this);
-        this.weatherChange = this.weatherChange.bind(this);
     }
 
     async componentDidMount() {
@@ -85,14 +63,12 @@ class HomeForm extends React.Component {
             departure: null,
             destinationCountry: null,
             destination: null,
-            preferredTemperature: null,
-            preferredWeather: null
         });
     }
 
     async whenRequest() {
         try {
-            let response = await fetch(`http://localhost:5000/when?departureCountry=${this.state.departureCountry.value}&destinationCountry=${this.state.destinationCountry.value}&departureAirport=${this.state.departure.value}&destinationAirport=${this.state.destination.value}&temperature=${this.state.preferredTemperature.value}&weather=${this.state.preferredWeather.value}`, {
+            let response = await fetch(`http://localhost:5000/when?departureCountry=${this.state.departureCountry.value}&destinationCountry=${this.state.destinationCountry.value}&departureAirport=${this.state.departure.value}&destinationAirport=${this.state.destination.value}`, {
                 "method": "GET",
                 "mode": "cors"
             })
@@ -151,14 +127,6 @@ class HomeForm extends React.Component {
         this.setState({ destination: option })
     }
 
-    temperatureChange(option) {
-        this.setState({ preferredTemperature: option })
-    }
-
-    weatherChange(option) {
-        this.setState({ preferredWeather: option })
-    }
-
 
     render() {
         if (this.state.result) {
@@ -207,14 +175,6 @@ class HomeForm extends React.Component {
                             <tr>
                                 <td><label>Destination Airport</label></td>
                                 <td><Select options={this.state.destinationAirports.map(airportListToOptions)} value={this.state.destination} onChange={this.destinationChange} /></td>
-                            </tr>
-                            <tr>
-                                <td><label>Preferred Temperature</label></td>
-                                <td><Select options={temperatureOptions} value={this.state.preferredTemperature} onChange={this.temperatureChange} /></td>
-                            </tr>
-                            <tr>
-                                <td><label>Preferred Weather</label></td>
-                                <td><Select options={weatherOptions} value={this.state.preferredWeather} onChange={this.weatherChange} /></td>
                             </tr>
                         </tbody>
                         <tfoot>

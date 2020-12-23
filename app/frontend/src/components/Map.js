@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import mapboxgl from 'mapbox-gl';
 import MapPopup from './MapPopup'
 
-mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
+mapboxgl.accessToken = 'pk.eyJ1IjoiYW5kcmV3ZDExMjAiLCJhIjoiY2tpcXNpbDRyMXphbzJxbmFyYnFhYzE4MiJ9.3yLy7Fp28bQw_tvvbpONhA';
 
 class Map extends React.Component {
     constructor(props) {

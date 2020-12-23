@@ -1,0 +1,49 @@
+{
+    "name": "wsig-client",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "@testing-library/jest-dom": "^5.11.4",
+        "@testing-library/react": "^11.1.0",
+        "@testing-library/user-event": "^12.1.10",
+        "dotenv": "^8.2.0",
+        "mapbox-gl": "^2.0.0",
+        "plotly.js": "^1.58.2",
+        "react": "^17.0.1",
+        "react-background-slider": "^2.0.0",
+        "react-dom": "^17.0.1",
+        "react-map-gl": "^5.2.11",
+        "react-plotly.js": "^2.5.1",
+        "react-router-dom": "^5.2.0",
+        "react-scripts": "4.0.0",
+        "react-select": "^3.1.1",
+        "web-vitals": "^0.2.4"
+    },
+    "scripts": {
+        "start": "PORT=3000 react-scripts --max_old_space_size=4096 start",
+        "build": "PORT=3000 react-scripts --max_old_space_size=4096 build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject"
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app",
+            "react-app/jest"
+        ]
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.6"
+    }
+}

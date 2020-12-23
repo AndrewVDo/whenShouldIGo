@@ -13,7 +13,7 @@ import pandas
 import numpy
 
 load_dotenv()
-app = Flask(__name__)
+app = Flask(__name__, static_folder='./static', static_url_path='/')
 CORS(app)
 
 mongoPW = os.getenv('MONGO_PW')
@@ -24,6 +24,11 @@ mongoClient = pymongo.MongoClient(
     f'mongodb+srv://Andrew:{mongoPW}@cluster0.dcy2n.mongodb.net/?retryWrites=true&w=majority')
 airportDB = mongoClient.airport_database
 currencyDB = mongoClient.currency_database
+
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
 
 
 @app.route('/countries', methods=["GET"])
@@ -272,4 +277,5 @@ def queryFlights(destination, departure):
 
 
 if __name__ == "__main__":
-    app.run()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)

@@ -31,7 +31,7 @@ class HomeForm extends React.Component {
 
     async getCountryList() {
         try {
-            let response = await fetch("http://localhost:5000/countries", {
+            let response = await fetch(`/countries`, {
                 "method": "GET",
                 "mode": "cors"
             })
@@ -45,7 +45,7 @@ class HomeForm extends React.Component {
 
     async getAirportList(iso_country) {
         try {
-            let response = await fetch(`http://localhost:5000/airports?iso_country=${iso_country}`, {
+            let response = await fetch(`/airports?iso_country=${iso_country}`, {
                 "method": "GET",
                 "mode": "cors"
             })
@@ -68,7 +68,7 @@ class HomeForm extends React.Component {
 
     async whenRequest() {
         try {
-            let response = await fetch(`http://localhost:5000/when?departureCountry=${this.state.departureCountry.value}&destinationCountry=${this.state.destinationCountry.value}&departureAirport=${this.state.departure.value}&destinationAirport=${this.state.destination.value}`, {
+            let response = await fetch(`/when?departureCountry=${this.state.departureCountry.value}&destinationCountry=${this.state.destinationCountry.value}&departureAirport=${this.state.departure.value}&destinationAirport=${this.state.destination.value}`, {
                 "method": "GET",
                 "mode": "cors"
             })

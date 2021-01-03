@@ -1,6 +1,7 @@
 import React from 'react'
 import Select from 'react-select'
 import { Redirect } from 'react-router-dom'
+import countryList from './country-list'
 
 class HomeForm extends React.Component {
     constructor(props) {
@@ -10,7 +11,6 @@ class HomeForm extends React.Component {
             departure: null,
             destinationCountry: null,
             destination: null,
-            countryList: [],
             departureAirports: [],
             destinationAirports: [],
             result: null,
@@ -23,24 +23,6 @@ class HomeForm extends React.Component {
         this.departureChange = this.departureChange.bind(this);
         this.destinationCountryChange = this.destinationCountryChange.bind(this)
         this.destinationChange = this.destinationChange.bind(this);
-    }
-
-    async componentDidMount() {
-        this.setState({ countryList: await this.getCountryList() })
-    }
-
-    async getCountryList() {
-        try {
-            let response = await fetch(`/countries`, {
-                "method": "GET",
-                "mode": "cors"
-            })
-            return response.json()
-        }
-        catch (error) {
-            console.log(error)
-            alert("The country list could not be fetched from server!")
-        }
     }
 
     async getAirportList(iso_country) {
@@ -77,6 +59,10 @@ class HomeForm extends React.Component {
         catch (error) {
             console.log(error)
             alert("Sorry that request didn't work please try another one!")
+            this.setState({
+                goMessage: "Go!",
+                result: null
+            })
         }
     }
 
@@ -95,6 +81,10 @@ class HomeForm extends React.Component {
         catch (error) {
             console.log(error)
             alert("Sorry that request didn't work please try another one!")
+            this.setState({
+                goMessage: "Go!",
+                result: null
+            })
         }
     }
 
@@ -131,21 +121,21 @@ class HomeForm extends React.Component {
     render() {
         if (this.state.result) {
             return <Redirect to={{
-                pathname: '/whenShouldIGo',
+                pathname: '/search',
                 state: { result: this.state.result }
             }}></Redirect>
         }
 
         const countryListToOptions = function (country) {
             return {
-                label: (country.name + "\t\u2014\t" + country.alpha3Code),
-                value: country.alpha2Code
+                label: country.name,
+                value: country.isoCode
             };
         }
 
         const airportListToOptions = function (airport) {
             return {
-                label: airport.name + "\t\u2014\t" + airport.iata_code,
+                label: airport.iata_code + "\t\u2014\t" + airport.name,
                 value: airport.iata_code
             }
         }
@@ -162,7 +152,7 @@ class HomeForm extends React.Component {
                         <tbody>
                             <tr>
                                 <td><label>Departure Country</label></td>
-                                <td><Select options={this.state.countryList.map(countryListToOptions)} value={this.state.departureCountry} onChange={this.departureCountryChange} /></td>
+                                <td><Select options={countryList.map(countryListToOptions)} value={this.state.departureCountry} onChange={this.departureCountryChange} /></td>
                             </tr>
                             <tr>
                                 <td><label>Departure Airport</label></td>
@@ -170,7 +160,7 @@ class HomeForm extends React.Component {
                             </tr>
                             <tr>
                                 <td><label>Destination Country</label></td>
-                                <td><Select options={this.state.countryList.map(countryListToOptions)} value={this.state.destinationCountry} onChange={this.destinationCountryChange} /></td>
+                                <td><Select options={countryList.map(countryListToOptions)} value={this.state.destinationCountry} onChange={this.destinationCountryChange} /></td>
                             </tr>
                             <tr>
                                 <td><label>Destination Airport</label></td>

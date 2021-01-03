@@ -13,7 +13,7 @@ class Root extends React.Component {
         return (
             <Router>
                 <Switch>
-                    <Route path='/whenShouldIGo' render={(props) => <Result {...props} />} />
+                    <Route path='/search' render={(props) => <Result {...props} />} />
                     <Route path='/'>
                         <HomeForm></HomeForm>
                     </Route>

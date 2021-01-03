@@ -14,6 +14,7 @@ import numpy
 
 load_dotenv()
 app = Flask(__name__, static_folder='./static', static_url_path='/')
+# app = Flask(__name__, static_folder='../frontend/build', static_url_path='/')
 CORS(app)
 
 mongoPW = os.getenv('MONGO_PW')
@@ -29,19 +30,6 @@ currencyDB = mongoClient.currency_database
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
-
-
-@app.route('/countries', methods=["GET"])
-def countries():
-    url = "https://ajayakv-rest-countries-v1.p.rapidapi.com/rest/v1/all"
-    headers = {
-        'x-rapidapi-key': rapidKey,
-        'x-rapidapi-host': "ajayakv-rest-countries-v1.p.rapidapi.com"
-    }
-    response = requests.request("GET", url, headers=headers)
-    if response.status_code != 200:
-        abort(502, 'rest-countries api not reachable')
-    return dumps(response.json())
 
 
 @app.route('/airports', methods=["GET"])

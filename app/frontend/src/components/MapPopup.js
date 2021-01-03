@@ -3,13 +3,13 @@ import Plot from 'react-plotly.js';
 
 class MapPopup extends React.Component {
     categorizeTemp(avgTemp, month) {
-        if (!avgTemp || !avgTemp.data || avgTemp.data.length == 0) {
+        if (!avgTemp || !avgTemp.data || avgTemp.data.length === 0) {
             return null;
         }
 
         let temp = [0, 0, 0, 0, 0, 0]
         for (let i = 0; i < avgTemp.data.length; i++) {
-            if (avgTemp.date[i].getMonth() == month) {
+            if (avgTemp.date[i].getMonth() === month) {
                 if (avgTemp.data[i] >= 20.0) {
                     temp[0]++;
                 }

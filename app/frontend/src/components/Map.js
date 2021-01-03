@@ -27,11 +27,13 @@ class Map extends React.Component {
 
         setTimeout(() => {
             map.flyTo({
+                speed: 0.2,
+                curve: 1,
                 center: [
                     this.props.dstLng,
                     this.props.dstLat
                 ],
-                essential: true
+                essential: true,
             })
         }, 3000)
     }
